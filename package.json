@@ -1,0 +1,63 @@
+{
+	"name": "@preeder/321bridge",
+	"version": "0.1.0",
+	"description": "Keeps an embedded iframe's localStorage and sessionStorage in the host page, so third-party widgets keep working where browsers block third-party storage.",
+	"keywords": [
+		"iframe",
+		"localStorage",
+		"sessionStorage",
+		"third-party",
+		"storage partitioning",
+		"incognito",
+		"widget",
+		"embed"
+	],
+	"author": "Paul Reeder",
+	"license": "MIT",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/preeder/321bridge.git"
+	},
+	"homepage": "https://github.com/preeder/321bridge#readme",
+	"bugs": {
+		"url": "https://github.com/preeder/321bridge/issues"
+	},
+	"type": "module",
+	"sideEffects": [
+		"./dist/321bridge-frame.js"
+	],
+	"exports": {
+		".": {
+			"import": {
+				"types": "./dist/index.d.ts",
+				"default": "./dist/index.js"
+			},
+			"require": {
+				"types": "./dist/index.d.cts",
+				"default": "./dist/index.cjs"
+			}
+		},
+		"./frame-script": "./dist/321bridge-frame.js",
+		"./host-script": "./dist/321bridge-host.js",
+		"./package.json": "./package.json"
+	},
+	"main": "./dist/index.cjs",
+	"module": "./dist/index.js",
+	"types": "./dist/index.d.ts",
+	"files": [
+		"dist"
+	],
+	"scripts": {
+		"build": "tsup",
+		"typecheck": "tsc --noEmit",
+		"test": "vitest run",
+		"demo": "npm run build && node demo/serve.mjs",
+		"prepublishOnly": "npm run typecheck && npm test && npm run build"
+	},
+	"devDependencies": {
+		"jsdom": "^31.0.0",
+		"tsup": "^9.0.0",
+		"typescript": "~5.9",
+		"vitest": "^5.1.0"
+	}
+}

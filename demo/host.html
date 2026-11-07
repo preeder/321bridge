@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>321bridge demo host</title>
+		<style>
+			body { font: 15px/1.5 system-ui, sans-serif; margin: 24px; max-width: 760px; }
+			iframe { width: 100%; height: 260px; border: 1px solid #999; border-radius: 6px; }
+			pre { background: #f3f3f3; padding: 8px; overflow: auto; }
+			label { display: block; margin: 8px 0; }
+		</style>
+		<script src="/321bridge-host.js"></script>
+	</head>
+	<body>
+		<h1>Host page (first party)</h1>
+		<p>
+			The frame below is served from a different site. Try this page in a private or incognito window, or with
+			third-party cookies blocked, with and without the bridge.
+		</p>
+		<label><input type="checkbox" id="bridged" /> Use 321bridge</label>
+		<button id="reload">Reload page</button>
+		<button id="clear">Clear this page's bridged storage</button>
+		<p><iframe id="frame" title="Third-party frame"></iframe></p>
+		<h2>This page's storage, as written by the frame</h2>
+		<pre id="dump"></pre>
+		<script>
+			const FRAME_URL = 'http://127.0.0.1:8092/';
+			const PREFIX = '__127.0.0.1:8092__';
+			const bridged = document.getElementById('bridged');
+			const frame = document.getElementById('frame');
+
+			bridged.checked = localStorage.getItem('demo:bridged') !== 'false';
+			bridged.addEventListener('change', () => {
+				localStorage.setItem('demo:bridged', String(bridged.checked));
+				location.reload();
+			});
+
+			if (bridged.checked) {
+				Bridge321.bridgeFrame(frame, FRAME_URL);
+			} else {
+				frame.src = FRAME_URL;
+			}
+
+			const dump = () => {
+				const pick = (storage) =>
+					Object.fromEntries(Object.keys(storage).filter((key) => key.startsWith(PREFIX)).map((key) => [key, storage.getItem(key)]));
+				document.getElementById('dump').textContent = JSON.stringify(
+					{ localStorage: pick(localStorage), sessionStorage: pick(sessionStorage) },
+					null,
+					2,
+				);
+			};
+			dump();
+			setInterval(dump, 500);
+
+			document.getElementById('reload').addEventListener('click', () => location.reload());
+			document.getElementById('clear').addEventListener('click', () => {
+				for (const storage of [localStorage, sessionStorage]) {
+					Object.keys(storage).filter((key) => key.startsWith(PREFIX)).forEach((key) => storage.removeItem(key));
+				}
+				location.reload();
+			});
+		</script>
+	</body>
+</html>

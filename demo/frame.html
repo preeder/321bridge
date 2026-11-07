@@ -1,0 +1,45 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<title>321bridge demo frame</title>
+		<!-- Must run before any other script touches storage. -->
+		<script src="/321bridge-frame.js"></script>
+		<style>
+			body { font: 15px/1.5 system-ui, sans-serif; margin: 12px; background: #eef6ff; }
+			.ok { color: #176f2c; }
+			.bad { color: #a4161a; }
+		</style>
+	</head>
+	<body>
+		<h2>Third-party frame</h2>
+		<p id="mode"></p>
+		<p>Visits (localStorage, should survive a page reload): <strong id="visits"></strong></p>
+		<p>Visits this tab (sessionStorage): <strong id="tabVisits"></strong></p>
+		<p>Name: <input id="name" placeholder="Type, then reload" /> (try "José 李 👋")</p>
+		<button onclick="location.reload()">Reload this frame only</button>
+		<script>
+			const mode = document.getElementById('mode');
+			const bridged = location.hash.startsWith('#321bridge=');
+			try {
+				const bump = (storage, key) => {
+					const next = Number(storage.getItem(key) || 0) + 1;
+					storage.setItem(key, String(next));
+					return next;
+				};
+				document.getElementById('visits').textContent = bump(localStorage, 'visits');
+				document.getElementById('tabVisits').textContent = bump(sessionStorage, 'visits');
+
+				const name = document.getElementById('name');
+				name.value = localStorage.getItem('name') || '';
+				name.addEventListener('input', () => localStorage.setItem('name', name.value));
+
+				mode.className = 'ok';
+				mode.textContent = bridged ? 'Storage: bridged to the host page' : 'Storage: the browser\'s own third-party storage';
+			} catch (error) {
+				mode.className = 'bad';
+				mode.textContent = 'Storage unavailable: ' + error.message;
+			}
+		</script>
+	</body>
+</html>
